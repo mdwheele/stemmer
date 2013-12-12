@@ -66,12 +66,14 @@ class Stemmer
     {
         $second_or_third_successful = false;
 
-        if(self::measure($word) > 0 AND self::stringEndsWith($word, 'eed')) {
-            self::replace('eed', 'ee', $word);
-        } elseif (self::stringContainsVowel($word) AND self::stringEndsWith($word, 'ing')) {
-            self::replace('ing', '', $word);
-        } elseif (self::stringContainsVowel($word) AND self::stringEndsWith($word, 'ed')) {
-            self::replace('ed', '', $word);
+        if(!self::replace('eed', 'ee', $word, 0)) {
+            if (self::stringContainsVowel(self::proposedString($word, 3)) AND self::stringEndsWith($word, 'ing')) {
+                self::replace('ing', '', $word);
+                $second_or_third_successful = true;
+            } elseif (self::stringContainsVowel(self::proposedString($word, 2)) AND self::stringEndsWith($word, 'ed')) {
+                self::replace('ed', '', $word);
+                $second_or_third_successful = true;
+            }
         }
 
         if($second_or_third_successful) {
@@ -107,73 +109,65 @@ class Stemmer
 
     public static function step2($word)
     {
-        if(self::measure($word) > 0) {
-            self::replace('ational', 'ate', $word) OR 
-            self::replace('tional', 'tion', $word) OR 
-            self::replace('ization', 'ize', $word) OR 
-            self::replace('iveness', 'ive', $word) OR 
-            self::replace('fulness', 'ful', $word) OR 
-            self::replace('ousness', 'ous', $word) OR 
-            self::replace('biliti', 'ble', $word) OR 
-            self::replace('entli', 'ent', $word) OR 
-            self::replace('ousli', 'ous', $word) OR 
-            self::replace('ation', 'ate', $word) OR 
-            self::replace('alism', 'al', $word) OR 
-            self::replace('aliti', 'al', $word) OR 
-            self::replace('iviti', 'ive', $word) OR 
-            self::replace('enci', 'ence', $word) OR 
-            self::replace('anci', 'ance', $word) OR 
-            self::replace('izer', 'ize', $word) OR 
-            self::replace('abli', 'able', $word) OR 
-            self::replace('ator', 'ate', $word) OR 
-            self::replace('eli', 'e', $word);
-        }
+        self::replace('ational', 'ate', $word, 0) OR 
+        self::replace('tional', 'tion', $word, 0) OR 
+        self::replace('ization', 'ize', $word, 0) OR 
+        self::replace('iveness', 'ive', $word, 0) OR 
+        self::replace('fulness', 'ful', $word, 0) OR 
+        self::replace('ousness', 'ous', $word, 0) OR 
+        self::replace('biliti', 'ble', $word, 0) OR 
+        self::replace('entli', 'ent', $word, 0) OR 
+        self::replace('ousli', 'ous', $word, 0) OR 
+        self::replace('ation', 'ate', $word, 0) OR 
+        self::replace('alism', 'al', $word, 0) OR 
+        self::replace('aliti', 'al', $word, 0) OR 
+        self::replace('iviti', 'ive', $word, 0) OR 
+        self::replace('enci', 'ence', $word, 0) OR 
+        self::replace('anci', 'ance', $word, 0) OR 
+        self::replace('izer', 'ize', $word, 0) OR
+        self::replace('abli', 'able', $word, 0) OR
+        self::replace('alli', 'al', $word, 0) OR
+        self::replace('ator', 'ate', $word, 0) OR 
+        self::replace('eli', 'e', $word, 0);
 
         return $word;
     }
 
     public static function step3($word)
     {
-        if(self::measure($word) > 0) {
-            self::replace('icate', 'ic', $word) OR 
-            self::replace('ative', '', $word) OR 
-            self::replace('alize', 'al', $word) OR 
-            self::replace('iciti', 'ic', $word) OR 
-            self::replace('ical', 'ic', $word) OR 
-            self::replace('ful', '', $word) OR 
-            self::replace('ness', '', $word);
-        }
+        self::replace('icate', 'ic', $word, 0) OR
+        self::replace('ative', '', $word, 0) OR
+        self::replace('alize', 'al', $word, 0) OR
+        self::replace('iciti', 'ic', $word, 0) OR
+        self::replace('ical', 'ic', $word, 0) OR
+        self::replace('ful', '', $word, 0) OR
+        self::replace('ness', '', $word, 0);
 
         return $word;
     }
 
     public static function step4($word)
     {
-        if(self::measure($word) > 1) {
-            self::replace('al', '', $word) OR 
-            self::replace('ance', '', $word) OR 
-            self::replace('ence', '', $word) OR 
-            self::replace('er', '', $word) OR 
-            self::replace('ic', '', $word) OR 
-            self::replace('able', '', $word) OR 
-            self::replace('ible', '', $word) OR 
-            self::replace('ant', '', $word) OR 
-            self::replace('ement', '', $word) OR 
-            self::replace('ment', '', $word) OR 
-            self::replace('ent', '', $word);
+        self::replace('al', '', $word, 1) OR
+        self::replace('ance', '', $word, 1) OR
+        self::replace('ence', '', $word, 1) OR
+        self::replace('er', '', $word, 1) OR
+        self::replace('ic', '', $word, 1) OR
+        self::replace('able', '', $word, 1) OR
+        self::replace('ible', '', $word, 1) OR
+        self::replace('ant', '', $word, 1) OR
+        self::replace('ement', '', $word, 1) OR
+        self::replace('ment', '', $word, 1) OR
+        self::replace('ent', '', $word, 1);
 
-            if(self::stringEndsWithLetter($word, 's') OR self::stringEndsWithLetter($word, 't')) {
-                self::replace('ion', '', $word);
-            }
-            else {
-                self::replace('ou', '', $word) OR
-                self::replace('ism', '', $word) OR
-                self::replace('ate', '', $word) OR
-                self::replace('iti', '', $word) OR
-                self::replace('ous', '', $word) OR
-                self::replace('ive', '', $word) OR
-                self::replace('ize', '', $word);
-            }
+        if(!((self::stringEndsWithLetter(self::proposedString($word, 3), 's') OR self::stringEndsWithLetter(self::proposedString($word, 3), 't')) AND self::replace('ion', '', $word, 1))) {
+            self::replace('ou', '', $word, 1) OR
+            self::replace('ism', '', $word, 1) OR
+            self::replace('ate', '', $word, 1) OR
+            self::replace('iti', '', $word, 1) OR
+            self::replace('ous', '', $word, 1) OR
+            self::replace('ive', '', $word, 1) OR
+            self::replace('ize', '', $word, 1);
         }
 
         return $word;
@@ -181,9 +175,9 @@ class Stemmer
 
     public static function step5a($word)
     {
-        if(self::measure($word) > 1) {
-            self::replace('e', '', $word);
-        } elseif (self::measure($word) == 1 AND !self::stringEndsWithCVC($word)) {
+        if(self::measure(self::proposedString($word, 1)) > 1) {
+            self::replace('e', '', $word, 1);
+        } elseif (self::measure(self::proposedString($word, 1)) == 1 AND !self::stringEndsWithCVC(self::proposedString($word, 1))) {
             self::replace('e', '', $word);
         }
 
@@ -243,7 +237,7 @@ class Stemmer
 
         // Remove all consonants from the beginning of the word and all vowels from the end.
         $word = preg_replace("#^$c+#", "", $word);
-        $word = preg_replace("#$v+#", "", $word);
+        $word = preg_replace("#$v+$#", "", $word);
 
         // Find all matches of a sequence of vowels followed by a sequence of consonants.
         preg_match_all("#($v+$c+)#", $word, $matches);
@@ -253,11 +247,24 @@ class Stemmer
         return count($matches[1]);
     }
 
-    public static function replace($search, $replace, &$subject)
+    /**
+     * Replace search string if the result has a measure greater than what is set OR is null.
+     *
+     * @param $search string to search for
+     * @param $replace string to replace search term if found
+     * @param $subject string to search
+     * @param null $m optional minimum resultant measure that must be met
+     * @return boolean whether or not the search string was found at the end of the original string
+     */
+    public static function replace($search, $replace, &$subject, $m = null)
     {
         $foundSearchStringAtEnd = preg_match("#$search$#i", $subject);
 
-        $subject = preg_replace("#$search$#i", $replace, $subject);
+        $replaced = preg_replace("#$search$#i", $replace, $subject);
+
+        if(is_null($m) OR self::measure(substr($subject, 0, -strlen($search))) > $m) {
+            $subject = $replaced;
+        }
 
         return $foundSearchStringAtEnd;
     }
@@ -316,10 +323,13 @@ class Stemmer
         $c = self::$consonant_regex;
         preg_match("#$c{2}$#", $string, $matches);
 
-        $first_character = $matches[0][0];
-        $second_character = $matches[0][1];
+        if(count($matches)) {
+            $first_character = $matches[0][0];
+            $second_character = $matches[0][1];
+            return $first_character == $second_character;
+        }
 
-        return $first_character == $second_character;
+        return false;
     }
 
     /**
@@ -335,8 +345,12 @@ class Stemmer
         $c = self::$consonant_regex;
 
         preg_match("#($c$v$c)$#", $string, $matches);
-        $last_letter = $matches[1][2];
 
-        return strlen($matches[1]) == 3 AND !in_array($last_letter, array('x','y','z'));
+        if(count($matches)) {
+            $last_letter = $matches[1][2];
+            return strlen($matches[1]) == 3 AND !in_array($last_letter, array('x','y','z'));
+        }
+
+        return false;
     }
 }
