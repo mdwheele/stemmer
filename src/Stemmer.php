@@ -48,28 +48,30 @@ class Stemmer
         $word = self::step4($word);
         $word = self::step5a($word);
         $word = self::step5b($word);
-    }
-
-    private static function step1a($word)
-    {
-        self::replace('sses', 'ss', $word) OR
-        self::replace('ies', 'i', $word) OR
-        self::replace('ies', 'i', $word) OR
-        self::replace('ies', 'i', $word);
 
         return $word;
     }
 
-    private static function step1b($word)
+    public static function step1a($word)
+    {
+        self::replace('sses', 'ss', $word) OR
+        self::replace('ies', 'i', $word) OR
+        self::replace('ss', 'ss', $word) OR
+        self::replace('s', '', $word);
+
+        return $word;
+    }
+
+    public static function step1b($word)
     {
         $second_or_third_successful = false;
 
         if(self::measure($word) > 0 AND self::stringEndsWith($word, 'eed')) {
             self::replace('eed', 'ee', $word);
-        } elseif (self::stemContainsVowel(self::proposedStem($word, 3)) AND self::stringEndsWith($word, 'ing')) {
+        } elseif (self::stringContainsVowel($word) AND self::stringEndsWith($word, 'ing')) {
             self::replace('ing', '', $word);
-        } elseif (self::stemContainsVowel(self::proposedStem($word, 2)) AND self::stringEndsWith($word, 'ed')) {
-            self::replace('eed', 'ee', $word);
+        } elseif (self::stringContainsVowel($word) AND self::stringEndsWith($word, 'ed')) {
+            self::replace('ed', '', $word);
         }
 
         if($second_or_third_successful) {
@@ -77,7 +79,7 @@ class Stemmer
                 !self::replace('bl', 'ble', $word) AND
                 !self::replace('iz', 'ize', $word)) {
                 if(
-                    self::stemEndsWithDoubleConsonant($word) AND
+                    self::stringEndsWithDoubleConsonant($word) AND
                     !(
                         self::stringEndsWith($word, 'l') OR
                         self::stringEndsWith($word, 's') OR
@@ -85,7 +87,7 @@ class Stemmer
                     )
                 ) {
                     $word = substr($word, 0, -1);
-                } elseif (self::measure($word) == 1 AND self::stemEndsWithCVC($word)) {
+                } elseif (self::measure($word) == 1 AND self::stringEndsWithCVC($word)) {
                     $word .= 'e';
                 }
             }
@@ -94,16 +96,16 @@ class Stemmer
         return $word;
     }
 
-    private static function step1c($word)
+    public static function step1c($word)
     {
-        if(self::stemContainsVowel(self::proposedStem($word, 1))) {
+        if(self::stringContainsVowel(self::proposedString($word, 1))) {
             self::replace('y', 'i', $word);
         }
 
         return $word;
     }
 
-    private static function step2($word)
+    public static function step2($word)
     {
         if(self::measure($word) > 0) {
             self::replace('ational', 'ate', $word) OR 
@@ -130,7 +132,7 @@ class Stemmer
         return $word;
     }
 
-    private static function step3($word)
+    public static function step3($word)
     {
         if(self::measure($word) > 0) {
             self::replace('icate', 'ic', $word) OR 
@@ -145,7 +147,7 @@ class Stemmer
         return $word;
     }
 
-    private static function step4($word)
+    public static function step4($word)
     {
         if(self::measure($word) > 1) {
             self::replace('al', '', $word) OR 
@@ -160,7 +162,7 @@ class Stemmer
             self::replace('ment', '', $word) OR 
             self::replace('ent', '', $word);
 
-            if(self::stemEndsWithLetter($word, 's') OR self::stemEndsWithLetter($word, 't')) {
+            if(self::stringEndsWithLetter($word, 's') OR self::stringEndsWithLetter($word, 't')) {
                 self::replace('ion', '', $word);
             }
             else {
@@ -177,22 +179,22 @@ class Stemmer
         return $word;
     }
 
-    private static function step5a($word)
+    public static function step5a($word)
     {
         if(self::measure($word) > 1) {
             self::replace('e', '', $word);
-        } elseif (self::measure($word) == 1 AND !self::stemEndsWithCVC($word)) {
+        } elseif (self::measure($word) == 1 AND !self::stringEndsWithCVC($word)) {
             self::replace('e', '', $word);
         }
 
         return $word;
     }
 
-    private static function step5b($word)
+    public static function step5b($word)
     {
         if( self::measure($word) > 1 AND
-            self::stemEndsWithDoubleConsonant($word) AND
-            self::stemEndsWithLetter($word, 'l')
+            self::stringEndsWithDoubleConsonant($word) AND
+            self::stringEndsWithLetter($word, 'l')
         ) {
             $word = substr($word, 0, -1);
         }
@@ -234,7 +236,7 @@ class Stemmer
      * @param $word
      * @return int number of vowel-consonant sequences.
      */
-    private static function measure($word)
+    public static function measure($word)
     {
         $c = self::$consonant_regex;
         $v = self::$vowel_regex;
@@ -251,7 +253,7 @@ class Stemmer
         return count($matches[1]);
     }
 
-    private static function replace($search, $replace, &$subject)
+    public static function replace($search, $replace, &$subject)
     {
         $foundSearchStringAtEnd = preg_match("#$search$#i", $subject);
 
@@ -261,58 +263,58 @@ class Stemmer
     }
 
     /**
-     * Returns a proposed stem for doing additional computation on.  It's basically a domain-specific
+     * Returns a proposed string for doing additional computation on.  It's basically a domain-specific
      * wrapper around culling the last $suffix_length characters off a string.
      *
      * @param $string full string
      * @param $suffix_length number of letters to cull off the end
-     * @return string the resultant 'stem' of the operation.
+     * @return string the resultant 'string' of the operation.
      */
-    private static function proposedStem($string, $suffix_length)
+    public static function proposedString($string, $suffix_length)
     {
         return substr($string, 0, -$suffix_length);
     }
 
-    private static function stringEndsWith($string, $search)
+    public static function stringEndsWith($string, $search)
     {
         return preg_match("#$search$#i", $string);
     }
 
     /**
-     * Returns true or false as to whether the stem ends with letter.
+     * Returns true or false as to whether the string ends with letter.
      *
-     * @param string $stem the stem
-     * @param string $letter the letter to assert whether it is at end of stem
-     * @return bool whether or not the stem ends with the letter provided.
+     * @param string $string the string
+     * @param string $letter the letter to assert whether it is at end of string
+     * @return bool whether or not the string ends with the letter provided.
      */
-    private static function stemEndsWithLetter($stem, $letter)
+    public static function stringEndsWithLetter($string, $letter)
     {
-        return substr($stem, -1) == $letter;
+        return substr($string, -1) == $letter;
     }
 
     /**
-     * Returns true or false as to whether the stem contains a vowel.
+     * Returns true or false as to whether the string contains a vowel.
      *
-     * @param string $stem the proposed stem to test against.
-     * @return bool whether or not the proposed stem contains a vowel.
+     * @param string $string the proposed string to test against.
+     * @return bool whether or not the proposed string contains a vowel.
      */
-    private static function stemContainsVowel($stem)
+    public static function stringContainsVowel($string)
     {
         $v = self::$vowel_regex;
-        return preg_match("#$v+#", $stem);
+        return preg_match("#$v+#", $string);
     }
 
     /**
      * Returns true or false as to whether the string contains two consonants
-     * that are equal and next to each other at the end of the stem.
+     * that are equal and next to each other at the end of the string.
      *
-     * @param string $stem the proposed stem to test against.
+     * @param string $string the proposed string to test against.
      * @return bool
      */
-    private static function stemEndsWithDoubleConsonant($stem)
+    public static function stringEndsWithDoubleConsonant($string)
     {
         $c = self::$consonant_regex;
-        preg_match("#$c{2}$#", $stem, $matches);
+        preg_match("#$c{2}$#", $string, $matches);
 
         $first_character = $matches[0][0];
         $second_character = $matches[0][1];
@@ -321,18 +323,18 @@ class Stemmer
     }
 
     /**
-     * Returns true or false as to whether the stem ends with a consonant-vowel-consonant
+     * Returns true or false as to whether the string ends with a consonant-vowel-consonant
      * sequence AND the second consonant is not [w], [x], or [y].
      *
-     * @param string $stem the proposed stem to test against.
+     * @param string $string the proposed string to test against.
      * @return bool
      */
-    private static function stemEndsWithCVC($stem)
+    public static function stringEndsWithCVC($string)
     {
         $v = self::$vowel_regex;
         $c = self::$consonant_regex;
 
-        preg_match("#($c$v$c)$#", $stem, $matches);
+        preg_match("#($c$v$c)$#", $string, $matches);
         $last_letter = $matches[1][2];
 
         return strlen($matches[1]) == 3 AND !in_array($last_letter, array('x','y','z'));
