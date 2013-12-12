@@ -1,0 +1,17 @@
+{
+    "name": "mdwheele/stemmer",
+    "description": "A word stemmer following the Porter Stemming Algorithm.",
+    "license": "GNU",
+    "authors": [
+        {
+            "name": "Dustin Wheeler",
+            "email": "mdwheele@ncsu.edu"
+        }
+    ],
+    "require": {
+
+    },
+    "require-dev": {
+        "phpunit/phpunit": "3.7.*"
+    }
+}
