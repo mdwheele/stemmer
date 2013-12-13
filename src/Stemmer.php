@@ -36,10 +36,6 @@ class Stemmer
      */
     public static function stem($word)
     {
-        if(strlen($word <= 2)){
-            return $word;
-        }
-
         $word = self::step1a($word);
         $word = self::step1b($word);
         $word = self::step1c($word);
@@ -67,19 +63,18 @@ class Stemmer
         $second_or_third_successful = false;
 
         if(!self::replace('eed', 'ee', $word, 0)) {
-            if (self::stringContainsVowel(self::proposedString($word, 3)) AND self::stringEndsWith($word, 'ing')) {
-                self::replace('ing', '', $word);
-                $second_or_third_successful = true;
-            } elseif (self::stringContainsVowel(self::proposedString($word, 2)) AND self::stringEndsWith($word, 'ed')) {
-                self::replace('ed', '', $word);
+            if((    self::stringContainsVowel(self::proposedString($word, 3)) AND self::replace('ing', '', $word)) OR
+                    self::stringContainsVowel(self::proposedString($word, 2)) AND self::replace('ed', '', $word)) {
                 $second_or_third_successful = true;
             }
+
         }
 
         if($second_or_third_successful) {
-            if( !self::replace('at', 'ate', $word) AND
-                !self::replace('bl', 'ble', $word) AND
-                !self::replace('iz', 'ize', $word)) {
+            if( !self::replace('bl', 'ble', $word) AND
+                !self::replace('at', 'ate', $word) AND
+                !self::replace('iz', 'ize', $word)
+            ) {
                 if(
                     self::stringEndsWithDoubleConsonant($word) AND
                     !(
@@ -136,38 +131,38 @@ class Stemmer
     public static function step3($word)
     {
         self::replace('icate', 'ic', $word, 0) OR
+        self::replace('iciti', 'ic', $word, 0) OR
         self::replace('ative', '', $word, 0) OR
         self::replace('alize', 'al', $word, 0) OR
-        self::replace('iciti', 'ic', $word, 0) OR
         self::replace('ical', 'ic', $word, 0) OR
-        self::replace('ful', '', $word, 0) OR
-        self::replace('ness', '', $word, 0);
+        self::replace('ness', '', $word, 0) OR
+        self::replace('ful', '', $word, 0);
 
         return $word;
     }
 
     public static function step4($word)
     {
-        self::replace('al', '', $word, 1) OR
+        self::replace('ement', '', $word, 1) OR
         self::replace('ance', '', $word, 1) OR
         self::replace('ence', '', $word, 1) OR
-        self::replace('er', '', $word, 1) OR
-        self::replace('ic', '', $word, 1) OR
         self::replace('able', '', $word, 1) OR
         self::replace('ible', '', $word, 1) OR
-        self::replace('ant', '', $word, 1) OR
-        self::replace('ement', '', $word, 1) OR
         self::replace('ment', '', $word, 1) OR
+        self::replace('ant', '', $word, 1) OR
         self::replace('ent', '', $word, 1);
 
         if(!((self::stringEndsWithLetter(self::proposedString($word, 3), 's') OR self::stringEndsWithLetter(self::proposedString($word, 3), 't')) AND self::replace('ion', '', $word, 1))) {
-            self::replace('ou', '', $word, 1) OR
             self::replace('ism', '', $word, 1) OR
             self::replace('ate', '', $word, 1) OR
             self::replace('iti', '', $word, 1) OR
             self::replace('ous', '', $word, 1) OR
             self::replace('ive', '', $word, 1) OR
-            self::replace('ize', '', $word, 1);
+            self::replace('ize', '', $word, 1) OR
+            self::replace('al', '', $word, 1) OR
+            self::replace('er', '', $word, 1) OR
+            self::replace('ic', '', $word, 1) OR
+            self::replace('ou', '', $word, 1);
         }
 
         return $word;
@@ -348,7 +343,7 @@ class Stemmer
 
         if(count($matches)) {
             $last_letter = $matches[1][2];
-            return strlen($matches[1]) == 3 AND !in_array($last_letter, array('x','y','z'));
+            return strlen($matches[1]) == 3 AND !in_array($last_letter, array('w','x','y'));
         }
 
         return false;
